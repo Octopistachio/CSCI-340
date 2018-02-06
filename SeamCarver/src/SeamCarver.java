@@ -4,6 +4,9 @@ public class SeamCarver {
 
     private EasyBufferedImage picture;
     private int imgHeight, imgWidth;
+    private int[][] allEnergies;
+    private int[][] pathWeight;
+    private int[] minPath;
 
     // create a seam carver object based on the given picture
     public SeamCarver(EasyBufferedImage picture) throws NullPointerException{
@@ -13,10 +16,15 @@ public class SeamCarver {
 
         imgHeight = picture.getHeight();
         imgWidth = picture.getWidth();
+        allEnergies = new int[imgHeight][imgWidth]; //Set the max bounds of the array to the size of the image
+
+        for(int i = 0; i < imgHeight; i++)
+            for(int j = 0; j < imgWidth; j++)
+                allEnergies[i][j] = getEnergy(i, j); //Put all the energies into an array
     }
 
     // energy of pixel at column x and row y
-    public double getEnergy(int row, int col) throws IndexOutOfBoundsException {
+    public int getEnergy(int row, int col) throws IndexOutOfBoundsException {
         if(row < 0 || row > imgHeight - 1) throw new IndexOutOfBoundsException("Row is out of range!"); //If the row is out of range
         if(col < 0 || col > imgWidth - 1) throw new IndexOutOfBoundsException("Column is out of range!"); //If the column is out of range
 
@@ -67,6 +75,9 @@ public class SeamCarver {
 
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
+
+
+
         return new int[]{0};
     }
 

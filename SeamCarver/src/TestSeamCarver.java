@@ -20,6 +20,9 @@ public class TestSeamCarver {
             System.out.println();
         }
 
+        System.out.println();
+        seamCarver.findVerticalSeam();
+
 
 
     }
