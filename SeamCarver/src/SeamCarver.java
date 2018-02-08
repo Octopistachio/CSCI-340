@@ -1,10 +1,10 @@
 import java.awt.*;
+import java.util.Arrays;
 
 public class SeamCarver {
 
     private EasyBufferedImage picture;
     private int imgHeight, imgWidth;
-    private int[][] allEnergies;
     private int[][] pathWeight;
     private int[] minPath;
 
@@ -16,11 +16,6 @@ public class SeamCarver {
 
         imgHeight = picture.getHeight();
         imgWidth = picture.getWidth();
-        allEnergies = new int[imgHeight][imgWidth]; //Set the max bounds of the array to the size of the image
-
-        for(int i = 0; i < imgHeight; i++)
-            for(int j = 0; j < imgWidth; j++)
-                allEnergies[i][j] = getEnergy(i, j); //Put all the energies into an array
     }
 
     // energy of pixel at column x and row y
@@ -76,9 +71,57 @@ public class SeamCarver {
     // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
 
+        pathWeight = new int[imgHeight][imgWidth]; //Set the max bounds of the array to the size of the image
 
+        //Get the path weight
+        for(int row = 0; row < imgHeight; row++) { //For each row
+            for (int col = 0; col < imgWidth; col++) { //For each column
+                if(row == 0) //If it is row 0
+                    pathWeight[row][col] = getEnergy(0, col); //Set each column in the first row equal to its energy
+                else { //If it is not row 0
+                    if(col == 0) //If it is the left column
+                        pathWeight[row][col] = Math.min(pathWeight[row-1][col], pathWeight[row-1][col+1]) + getEnergy(row, col);
+                    else if(col == imgWidth-1) //If it is the right column
+                        pathWeight[row][col] = Math.min(pathWeight[row-1][col], pathWeight[row-1][col-1]) + getEnergy(row, col);
+                    else //If it is any other column
+                        pathWeight[row][col] = Math.min(pathWeight[row-1][col], Math.min(pathWeight[row-1][col-1], pathWeight[row-1][col+1])) + getEnergy(row, col);
 
-        return new int[]{0};
+                }
+            }
+        }
+
+        //Find the minimum
+        int min = 0;
+        int minCol = 0;
+        for(int i = 0; i < imgWidth; i++) { //For each column in the image
+            if(i == 0) min = pathWeight[imgHeight-1][i]; //Set the minimum to the first number
+            if(pathWeight[imgHeight-1][i] < min) { //Check if the number is less than the current min
+                min = pathWeight[imgHeight - 1][i]; //If it is, set it to the min
+                minCol = i; //Get the min's column
+            }
+        }
+
+        //Find the minimum path, going backwards through the array
+        minPath = new int[imgHeight];
+        minPath[imgHeight-1] = min;
+
+        for (int row = imgHeight - 1; row >= 1; row--) {
+            if(minCol == 0) { //If the minimum number's column is on the left border
+                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol + 1]);
+                if(pathWeight[row - 1][minCol + 1] == minPath[row]) minCol++; //If the smaller number is to the right, increase the minCol by 1
+            }
+            else if(minCol == imgWidth - 1) { //If the minimum number's column is on the right border
+                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol - 1]);
+                if(pathWeight[row - 1][minCol - 1] == minPath[row]) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+            }
+            else { //If the minimum number's column is not on a border
+                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], Math.min(pathWeight[row - 1][minCol - 1], pathWeight[row - 1][minCol + 1]));
+                if(pathWeight[row - 1][minCol - 1] == minPath[row]) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+                else if(pathWeight[row - 1][minCol + 1] == minPath[row]) minCol++; //If the smaller number is to the right, increase the minCol by 1
+            }
+        }
+
+        return minPath;
     }
 
     // sequence of indices for a horizontal seam

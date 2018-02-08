@@ -1,11 +1,12 @@
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 
 public class TestSeamCarver {
 
     public static void main(String args[]) {
         EasyBufferedImage image = null;
         try {
-            image = EasyBufferedImage.createImage("SeamCarver/5x6.png");
+            image = EasyBufferedImage.createImage("SeamCarver/smallturkey.png");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -21,7 +22,7 @@ public class TestSeamCarver {
         }
 
         System.out.println();
-        seamCarver.findVerticalSeam();
+        System.out.println(Arrays.toString(seamCarver.findVerticalSeam()));
 
 
 
