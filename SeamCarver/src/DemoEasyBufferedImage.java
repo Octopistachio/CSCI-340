@@ -9,7 +9,7 @@ public class DemoEasyBufferedImage {
    public static void main (String [] args) throws Exception {
 
        // Note the use of the createImage method rather than a constructor
-       EasyBufferedImage image = EasyBufferedImage.createImage("smallturkey.png");
+       EasyBufferedImage image = EasyBufferedImage.createImage("SeamCarver/smallturkey.png");
        image.show("Original Image");
 
        // Get the image as a 3D array of pixels

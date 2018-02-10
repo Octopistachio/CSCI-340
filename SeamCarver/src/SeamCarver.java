@@ -1,5 +1,7 @@
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SeamCarver {
 
@@ -90,9 +92,9 @@ public class SeamCarver {
             }
         }
 
-        //Find the minimum
+        //Find the minimum of the bottom row
         int min = 0;
-        int minCol = 0;
+        int minCol = 0; //The column that contains the minimum
         for(int i = 0; i < imgWidth; i++) { //For each column in the image
             if(i == 0) min = pathWeight[imgHeight-1][i]; //Set the minimum to the first number
             if(pathWeight[imgHeight-1][i] < min) { //Check if the number is less than the current min
@@ -103,40 +105,126 @@ public class SeamCarver {
 
         //Find the minimum path, going backwards through the array
         minPath = new int[imgHeight];
-        minPath[imgHeight-1] = min;
+        minPath[imgHeight-1] = minCol;
 
-        for (int row = imgHeight - 1; row >= 1; row--) {
+        for (int row = imgHeight - 1; row > 0; row--) {
+            int minValue = 0; //Reset the minimum value
+
             if(minCol == 0) { //If the minimum number's column is on the left border
-                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol + 1]);
-                if(pathWeight[row - 1][minCol + 1] == minPath[row]) minCol++; //If the smaller number is to the right, increase the minCol by 1
+                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol + 1]);
+                if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
             }
             else if(minCol == imgWidth - 1) { //If the minimum number's column is on the right border
-                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol - 1]);
-                if(pathWeight[row - 1][minCol - 1] == minPath[row]) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol - 1]);
+                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
             }
             else { //If the minimum number's column is not on a border
-                minPath[row-1] = Math.min(pathWeight[row - 1][minCol], Math.min(pathWeight[row - 1][minCol - 1], pathWeight[row - 1][minCol + 1]));
-                if(pathWeight[row - 1][minCol - 1] == minPath[row]) minCol--; //If the smaller number is to the left, decrease the minCol by 1
-                else if(pathWeight[row - 1][minCol + 1] == minPath[row]) minCol++; //If the smaller number is to the right, increase the minCol by 1
+                minValue = Math.min(pathWeight[row - 1][minCol], Math.min(pathWeight[row - 1][minCol - 1], pathWeight[row - 1][minCol + 1]));
+                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+                else if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
             }
+            minPath[row-1] = minCol;
         }
 
-        return minPath;
+        return minPath; //Return the columns, starting from the top and going down
     }
 
     // sequence of indices for a horizontal seam
     public int[] findHorizontalSeam() {
-        return new int[]{0};
+        pathWeight = new int[imgHeight][imgWidth]; //Set the max bounds of the array to the size of the image
+
+        //Get the path weight
+        for(int row = 0; row < imgHeight; row++) { //For each row
+            for (int col = 0; col < imgWidth; col++) { //For each column
+                if(col == 0) //If it column 0
+                    pathWeight[row][col] = getEnergy(row, col); //Set each column in the first row equal to its energy
+                else { //If it is not column 0
+                    if(row == 0) //If it is the top row
+                        pathWeight[row][col] = Math.min(pathWeight[row][col-1], pathWeight[row+1][col-1]) + getEnergy(row, col);
+                    else if(row == imgHeight-1) //If it is the bottom row
+                        pathWeight[row][col] = Math.min(pathWeight[row][col-1], pathWeight[row-1][col-1]) + getEnergy(row, col);
+                    else //If it is any other row
+                        pathWeight[row][col] = Math.min(pathWeight[row-1][col-1], Math.min(pathWeight[row-1][col-1], pathWeight[row+1][col-1])) + getEnergy(row, col);
+
+                }
+            }
+        }
+
+        //Find the minimum of the right-most column
+        int min = 0;
+        int minRow = 0; //The row that contains the minimum
+        for(int i = 0; i < imgWidth; i++) { //For each column in the image
+            if(i == 0) min = pathWeight[imgHeight-1][i]; //Set the minimum to the first number
+            if(pathWeight[imgHeight-1][i] < min) { //Check if the number is less than the current min
+                min = pathWeight[imgHeight - 1][i]; //If it is, set it to the min
+                minRow = i; //Get the min's column
+            }
+        }
+
+        //Find the minimum path, going backwards through the array
+        minPath = new int[imgHeight];
+        minPath[imgHeight-1] = minRow;
+
+        for (int row = imgHeight - 1; row > 0; row--) {
+            int minValue = 0; //Reset the minimum value
+
+            if(minCol == 0) { //If the minimum number's column is on the left border
+                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol + 1]);
+                if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
+            }
+            else if(minCol == imgWidth - 1) { //If the minimum number's column is on the right border
+                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol - 1]);
+                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+            }
+            else { //If the minimum number's column is not on a border
+                minValue = Math.min(pathWeight[row - 1][minCol], Math.min(pathWeight[row - 1][minCol - 1], pathWeight[row - 1][minCol + 1]));
+                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+                else if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
+            }
+            minPath[row-1] = minCol;
+        }
+
+        return minPath; //Return the columns, starting from the top and going down
     }
 
     // find and remove vertical seam from the picture
     public void findAndRemoveVerticalSeam() {
+        int[] seam = findVerticalSeam();
 
+        // Get the image as a 3D array of pixels
+        int [][][] pixels = picture.getPixels3D();
+
+        int leftBound_x = 2;
+        int rightBound_x = 3;
+
+        int [][][] leftPixels = new int[imgHeight][leftBound_x][3];
+        int [][][] rightPixels = new int[imgHeight][imgWidth][3];
+
+        //Create a left side and a right side of the image
+        for (int row=0; row<imgHeight; row++)
+            for (int col=0; col<imgWidth; col++)
+                for (int rgba = 0; rgba < 3; rgba++) {
+                    if(col < leftBound_x) {
+                        leftPixels[row][col][rgba] = pixels[row][col][rgba];
+                        System.out.println(row + " " + col + " " + rgba);
+                    }
+                    if(col > rightBound_x) {
+                        rightPixels[row][col][rgba] = pixels[row][col][rgba];
+                        System.out.println(row + " " + col + " " + rgba);
+                    }
+                }
+
+        //Merge the two arrays together
+        int[][][] newPixels = new int[imgHeight][imgWidth - rightBound_x - leftBound_x][3];
+
+        // Create an image with the new pixel values
+        EasyBufferedImage newImage = EasyBufferedImage.createImage(newPixels);
+        newImage.show("New Image 1");
     }
 
     // find and remove horizontal seam from the picture
     public void findAndRemoveHorizontalSeam() {
-
+        findHorizontalSeam();
     }
 
     private int getRed(int row, int col) {
