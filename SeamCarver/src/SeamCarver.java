@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -165,23 +166,23 @@ public class SeamCarver {
         minPath = new int[imgHeight];
         minPath[imgHeight-1] = minRow;
 
-        for (int row = imgHeight - 1; row > 0; row--) {
+        for (int col = imgWidth - 1; col > 0; col--) {
             int minValue = 0; //Reset the minimum value
 
-            if(minCol == 0) { //If the minimum number's column is on the left border
-                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol + 1]);
-                if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
+            if(minRow == 0) { //If the minimum number's row is on the top border
+                minValue = Math.min(pathWeight[minRow][col - 1], pathWeight[minRow + 1][col - 1]);
+                if(pathWeight[minRow + 1][col - 1] == minValue) minRow++; //If the smaller number is to the right, increase the minCol by 1
             }
-            else if(minCol == imgWidth - 1) { //If the minimum number's column is on the right border
-                minValue = Math.min(pathWeight[row - 1][minCol], pathWeight[row - 1][minCol - 1]);
-                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
+            else if(minRow == imgHeight - 1) { //If the minimum number's column is on the bottom border
+                minValue = Math.min(pathWeight[minRow][col - 1], pathWeight[minRow - 1][col - 1]);
+                if(pathWeight[minRow - 1][col - 1] == minValue) minRow--; //If the smaller number is to the left, decrease the minCol by 1
             }
             else { //If the minimum number's column is not on a border
-                minValue = Math.min(pathWeight[row - 1][minCol], Math.min(pathWeight[row - 1][minCol - 1], pathWeight[row - 1][minCol + 1]));
-                if(pathWeight[row - 1][minCol - 1] == minValue) minCol--; //If the smaller number is to the left, decrease the minCol by 1
-                else if(pathWeight[row - 1][minCol + 1] == minValue) minCol++; //If the smaller number is to the right, increase the minCol by 1
+                minValue = Math.min(pathWeight[minRow][col - 1], Math.min(pathWeight[minRow - 1][col - 1], pathWeight[minRow + 1][col - 1]));
+                if(pathWeight[minRow - 1][col - 1] == minValue) minRow--; //If the smaller number is to the left, decrease the minCol by 1
+                else if(pathWeight[minRow + 1][col - 1] == minValue) minRow++; //If the smaller number is to the right, increase the minCol by 1
             }
-            minPath[row-1] = minCol;
+            minPath[col-1] = minRow;
         }
 
         return minPath; //Return the columns, starting from the top and going down
@@ -190,41 +191,51 @@ public class SeamCarver {
     // find and remove vertical seam from the picture
     public void findAndRemoveVerticalSeam() {
         int[] seam = findVerticalSeam();
+        int imgWidth_new = imgWidth - 1;
 
         // Get the image as a 3D array of pixels
         int [][][] pixels = picture.getPixels3D();
+        int[][][] newPixels = new int[imgHeight][imgWidth_new][3];
 
-        int leftBound_x = 2;
-        int rightBound_x = 3;
 
-        int [][][] leftPixels = new int[imgHeight][leftBound_x][3];
-        int [][][] rightPixels = new int[imgHeight][imgWidth][3];
-
-        //Create a left side and a right side of the image
         for (int row=0; row<imgHeight; row++)
             for (int col=0; col<imgWidth; col++)
-                for (int rgba = 0; rgba < 3; rgba++) {
-                    if(col < leftBound_x) {
-                        leftPixels[row][col][rgba] = pixels[row][col][rgba];
-                        System.out.println(row + " " + col + " " + rgba);
+                for (int rgb = 0; rgb < 3; rgb++)
+                    if(col < seam[row]) {
+                        newPixels[row][col][rgb] = pixels[row][col][rgb];
                     }
-                    if(col > rightBound_x) {
-                        rightPixels[row][col][rgba] = pixels[row][col][rgba];
-                        System.out.println(row + " " + col + " " + rgba);
+                    else if(col > seam[row]) {
+                        newPixels[row][col-1][rgb] = pixels[row][col][rgb];
                     }
-                }
 
-        //Merge the two arrays together
-        int[][][] newPixels = new int[imgHeight][imgWidth - rightBound_x - leftBound_x][3];
+        getImage(newPixels, "New Image");
 
-        // Create an image with the new pixel values
-        EasyBufferedImage newImage = EasyBufferedImage.createImage(newPixels);
-        newImage.show("New Image 1");
     }
 
     // find and remove horizontal seam from the picture
     public void findAndRemoveHorizontalSeam() {
-        findHorizontalSeam();
+        int[] seam = findHorizontalSeam();
+        int imgHeight_new = imgHeight - 1;
+
+        // Get the image as a 3D array of pixels
+        int [][][] pixels = picture.getPixels3D();
+        int[][][] newPixels = new int[imgHeight_new][imgWidth][3];
+
+
+        for (int row=0; row<imgHeight-1; row++)
+            for (int col=0; col<imgWidth; col++)
+                for (int rgb = 0; rgb < 3; rgb++)
+                    if(row != seam[row]) {
+                        newPixels[row][col][rgb] = pixels[row][col][rgb];
+                    }
+                    /*if(row < seam[col]) {
+                        newPixels[row][col][rgb] = pixels[row][col][rgb];
+                    }
+                    else if(row > seam[col]) {
+                        newPixels[row-1][col][rgb] = pixels[row][col][rgb];
+                    }*/
+
+        getImage(newPixels, "New Image");
     }
 
     private int getRed(int row, int col) {
@@ -243,5 +254,12 @@ public class SeamCarver {
         int rgb = picture.getRGB(col, row);
         Color c = new Color(rgb);
         return c.getBlue();
+    }
+
+    public void getImage(int[][][] pixels, String name) {
+        // Create an image with the new pixel values
+        EasyBufferedImage newImage = EasyBufferedImage.createImage(pixels);
+        newImage.show(name);
+
     }
 }
