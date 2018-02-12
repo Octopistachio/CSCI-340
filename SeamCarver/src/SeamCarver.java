@@ -153,18 +153,18 @@ public class SeamCarver {
 
         //Find the minimum of the right-most column
         int min = 0;
-        int minRow = 0; //The row that contains the minimum
-        for(int i = 0; i < imgWidth; i++) { //For each column in the image
-            if(i == 0) min = pathWeight[imgHeight-1][i]; //Set the minimum to the first number
-            if(pathWeight[imgHeight-1][i] < min) { //Check if the number is less than the current min
-                min = pathWeight[imgHeight - 1][i]; //If it is, set it to the min
+        int minRow = 0; //The column that contains the minimum
+        for(int i = 0; i < imgHeight; i++) { //For each column in the image
+            if(i == 0) min = pathWeight[i][imgWidth - 1]; //Set the minimum to the first number
+            if(pathWeight[i][imgWidth - 1] < min) { //Check if the number is less than the current min
+                min = pathWeight[i][imgWidth - 1]; //If it is, set it to the min
                 minRow = i; //Get the min's column
             }
         }
 
         //Find the minimum path, going backwards through the array
-        minPath = new int[imgHeight];
-        minPath[imgHeight-1] = minRow;
+        minPath = new int[imgWidth];
+        minPath[imgWidth-1] = minRow;
 
         for (int col = imgWidth - 1; col > 0; col--) {
             int minValue = 0; //Reset the minimum value
@@ -225,15 +225,12 @@ public class SeamCarver {
         for (int row=0; row<imgHeight-1; row++)
             for (int col=0; col<imgWidth; col++)
                 for (int rgb = 0; rgb < 3; rgb++)
-                    if(row != seam[row]) {
-                        newPixels[row][col][rgb] = pixels[row][col][rgb];
-                    }
-                    /*if(row < seam[col]) {
+                    if(row < seam[col]) {
                         newPixels[row][col][rgb] = pixels[row][col][rgb];
                     }
                     else if(row > seam[col]) {
                         newPixels[row-1][col][rgb] = pixels[row][col][rgb];
-                    }*/
+                    }
 
         getImage(newPixels, "New Image");
     }

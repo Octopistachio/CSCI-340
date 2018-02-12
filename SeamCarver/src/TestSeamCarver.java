@@ -28,9 +28,6 @@ public class TestSeamCarver {
 
 
 
-       for(int i = 1; i > 0; i--)
-            seamCarver.findAndRemoveHorizontalSeam();
-        image.show("Old Image");
 
 
 
