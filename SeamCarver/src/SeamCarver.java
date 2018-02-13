@@ -1,19 +1,25 @@
+/**
+ * Find the section of an image with
+ * the least amount of energy and
+ * crop it out
+ *
+ * @author Matthew Wilson
+ * @date February 1st
+ */
+
 import java.awt.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class SeamCarver {
 
-    private EasyBufferedImage picture;
-    private int imgHeight, imgWidth;
-    private int[][] pathWeight;
-    private int[] minPath;
+    private EasyBufferedImage picture; //The image to be manipulated
+    private int imgHeight, imgWidth; //The height and width of the image
+    private int[][] pathWeight; //The weight of each pixel
+    private int[] minPath; //The minimum path through the image
+    private int[][][] newPixelsGlobal;
 
     // create a seam carver object based on the given picture
     public SeamCarver(EasyBufferedImage picture) throws NullPointerException{
-        if(picture == null) throw new NullPointerException("Image cannot be null!");
+        if(picture == null) throw new NullPointerException("Image cannot be null!"); //If the picture is null, throw an error
 
         this.picture = picture;
 
@@ -23,8 +29,8 @@ public class SeamCarver {
 
     // energy of pixel at column x and row y
     public int getEnergy(int row, int col) throws IndexOutOfBoundsException {
-        if(row < 0 || row > imgHeight - 1) throw new IndexOutOfBoundsException("Row is out of range!"); //If the row is out of range
-        if(col < 0 || col > imgWidth - 1) throw new IndexOutOfBoundsException("Column is out of range!"); //If the column is out of range
+        if(row < 0 || row > imgHeight - 1) throw new IndexOutOfBoundsException("Row is out of range!"); //If the row is out of range throw an exception
+        if(col < 0 || col > imgWidth - 1) throw new IndexOutOfBoundsException("Column is out of range!"); //If the column is out of range throw an exception
 
         int Rx = 0, Gx = 0, Bx = 0; //The changes in Red, Blue, and Green in the x coord
         int Ry = 0, Gy = 0, By = 0; //The changes in Red, Blue, and Green in the y coord
@@ -94,7 +100,7 @@ public class SeamCarver {
         }
 
         //Find the minimum of the bottom row
-        int min = 0;
+        int min = 0; //The minimum number
         int minCol = 0; //The column that contains the minimum
         for(int i = 0; i < imgWidth; i++) { //For each column in the image
             if(i == 0) min = pathWeight[imgHeight-1][i]; //Set the minimum to the first number
@@ -105,10 +111,10 @@ public class SeamCarver {
         }
 
         //Find the minimum path, going backwards through the array
-        minPath = new int[imgHeight];
-        minPath[imgHeight-1] = minCol;
+        minPath = new int[imgHeight]; //Set the minimum path equal to the height of the image
+        minPath[imgHeight-1] = minCol; //Set the last element in the array to the column that holds the minimum in the last row
 
-        for (int row = imgHeight - 1; row > 0; row--) {
+        for (int row = imgHeight - 1; row > 0; row--) { //For each row, going backwards
             int minValue = 0; //Reset the minimum value
 
             if(minCol == 0) { //If the minimum number's column is on the left border
@@ -151,20 +157,20 @@ public class SeamCarver {
             }
         }
 
-        //Find the minimum of the right-most column
-        int min = 0;
-        int minRow = 0; //The column that contains the minimum
-        for(int i = 0; i < imgHeight; i++) { //For each column in the image
+        //Find the minimum of the bottom-most row
+        int min = 0; //The minimum number
+        int minRow = 0; //The row that contains the minimum
+        for(int i = 0; i < imgHeight; i++) { //For each row in the image
             if(i == 0) min = pathWeight[i][imgWidth - 1]; //Set the minimum to the first number
             if(pathWeight[i][imgWidth - 1] < min) { //Check if the number is less than the current min
                 min = pathWeight[i][imgWidth - 1]; //If it is, set it to the min
-                minRow = i; //Get the min's column
+                minRow = i; //Get the min's row
             }
         }
 
         //Find the minimum path, going backwards through the array
-        minPath = new int[imgWidth];
-        minPath[imgWidth-1] = minRow;
+        minPath = new int[imgWidth]; //Set the minimum path equal to the width of the image
+        minPath[imgWidth-1] = minRow; //Set the last element in the array to the row that holds the minimum in the last column
 
         for (int col = imgWidth - 1; col > 0; col--) {
             int minValue = 0; //Reset the minimum value
@@ -182,57 +188,59 @@ public class SeamCarver {
                 if(pathWeight[minRow - 1][col - 1] == minValue) minRow--; //If the smaller number is to the left, decrease the minCol by 1
                 else if(pathWeight[minRow + 1][col - 1] == minValue) minRow++; //If the smaller number is to the right, increase the minCol by 1
             }
-            minPath[col-1] = minRow;
+            minPath[col-1] = minRow; //Place the value into the array
         }
 
-        return minPath; //Return the columns, starting from the top and going down
+        return minPath; //Return the rows, starting from the left and going right
     }
 
     // find and remove vertical seam from the picture
     public void findAndRemoveVerticalSeam() {
-        int[] seam = findVerticalSeam();
-        int imgWidth_new = imgWidth - 1;
+        int[] seam = findVerticalSeam(); //Get the seam
+        imgWidth--; //Set the new width of the image to itself minus 1
 
         // Get the image as a 3D array of pixels
-        int [][][] pixels = picture.getPixels3D();
-        int[][][] newPixels = new int[imgHeight][imgWidth_new][3];
+        int[][][] pixels = picture.getPixels3D(); //Get the old image as an array
+        int[][][] newPixels = new int[imgHeight][imgWidth][3]; //Set the bounds of the new array
 
 
-        for (int row=0; row<imgHeight; row++)
-            for (int col=0; col<imgWidth; col++)
-                for (int rgb = 0; rgb < 3; rgb++)
-                    if(col < seam[row]) {
-                        newPixels[row][col][rgb] = pixels[row][col][rgb];
+        for (int row=0; row<imgHeight; row++) //For each row
+            for (int col=0; col<imgWidth; col++) //For each column
+                for (int rgb = 0; rgb < 3; rgb++) //For each colour (rgb)
+                    if(col < seam[row]) { //If the column is to the left of the seam
+                        newPixels[row][col][rgb] = pixels[row][col][rgb]; //Copy it over as normal
                     }
-                    else if(col > seam[row]) {
-                        newPixels[row][col-1][rgb] = pixels[row][col][rgb];
+                    else if(col > seam[row]) { //If the column is to the right of the seam
+                        newPixels[row][col-1][rgb] = pixels[row][col+1][rgb]; //Move every pixel to the right of the seam over to the left
                     }
 
-        getImage(newPixels, "New Image");
+        newPixelsGlobal = null; //Clear out the global array
+        newPixelsGlobal = newPixels; //Set it to newPixels
 
     }
 
     // find and remove horizontal seam from the picture
     public void findAndRemoveHorizontalSeam() {
-        int[] seam = findHorizontalSeam();
-        int imgHeight_new = imgHeight - 1;
+        int[] seam = findHorizontalSeam(); //Get the seam
+        imgHeight--; //Set the new height of the image to itself minus 1
 
         // Get the image as a 3D array of pixels
-        int [][][] pixels = picture.getPixels3D();
-        int[][][] newPixels = new int[imgHeight_new][imgWidth][3];
+        int[][][] pixels = picture.getPixels3D(); //Get the old image as an array
+        int[][][] newPixels = new int[imgHeight][imgWidth][3]; //Set the bounds of the new array
 
 
-        for (int row=0; row<imgHeight-1; row++)
-            for (int col=0; col<imgWidth; col++)
-                for (int rgb = 0; rgb < 3; rgb++)
-                    if(row < seam[col]) {
-                        newPixels[row][col][rgb] = pixels[row][col][rgb];
+        for (int row=0; row<imgHeight+1; row++) //For each row
+            for (int col=0; col<imgWidth; col++) //For each column
+                for (int rgb = 0; rgb < 3; rgb++) //For each colour (rgb)
+                    if(row < seam[col]) { //If the row is above the seam
+                        newPixels[row][col][rgb] = pixels[row][col][rgb]; //Copy it over as normal
                     }
-                    else if(row > seam[col]) {
-                        newPixels[row-1][col][rgb] = pixels[row][col][rgb];
+                    else if(row > seam[col]) { //If the row is below the seam
+                        newPixels[row-1][col][rgb] = pixels[row+1][col][rgb]; //Move every pixel below the seam up one
                     }
 
-        getImage(newPixels, "New Image");
+        newPixelsGlobal = null; //Clear out the global array
+        newPixelsGlobal = newPixels; //Set it to newPixels
     }
 
     private int getRed(int row, int col) {
@@ -253,10 +261,16 @@ public class SeamCarver {
         return c.getBlue();
     }
 
-    public void getImage(int[][][] pixels, String name) {
-        // Create an image with the new pixel values
-        EasyBufferedImage newImage = EasyBufferedImage.createImage(pixels);
-        newImage.show(name);
+    public void getImage() {
+        if(newPixelsGlobal != null) { //If the array is not empty
+            EasyBufferedImage newImage = EasyBufferedImage.createImage(newPixelsGlobal); //Create a new image
+            newImage.show("New Image"); //Show the new image
+        }
+        else { //If the array is empty
+            picture.show("Old Image"); //Show the old image
+        }
+
+
 
     }
 }

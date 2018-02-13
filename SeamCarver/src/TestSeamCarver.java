@@ -6,27 +6,20 @@ public class TestSeamCarver {
     public static void main(String args[]) {
         EasyBufferedImage image = null;
         try {
-            image = EasyBufferedImage.createImage("SeamCarver/turkey.png");
+            image = EasyBufferedImage.createImage("SeamCarver/smallturkey.png");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
         SeamCarver seamCarver = new SeamCarver(image);
 
-       /* for(int i = 0; i < image.getHeight(); i++) {
-            for(int j = 0; j < image.getWidth(); j++) {
-                System.out.print(seamCarver.getEnergy(i, j) + " ");
 
-            }
-            System.out.println();
-        }
+        seamCarver.getImage();
 
-        System.out.println();
-        System.out.println(Arrays.toString(seamCarver.findVerticalSeam()));
+        for(int i = 10; i > 0; i--)
+            seamCarver.findAndRemoveVerticalSeam();
 
-        */
-
-
+        seamCarver.getImage();
 
 
 
