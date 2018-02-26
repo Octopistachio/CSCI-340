@@ -1,9 +1,9 @@
 import javax.swing.tree.TreeNode;
 import javax.xml.soap.Node;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.TreeMap;
 
@@ -15,20 +15,19 @@ public final class Huffman {
     private Huffman() { }
 
     private static class Node implements Comparable<Node> {
-        private final char ch;
-        private final int freq;
-        private final Node left, right;
+        private final char ch; //The character in the node
+        private final int freq; //The frequency of the character
+        private final Node left, right; //The nodes to the left and right of the current node
 
         Node(char ch, int freq, Node left, Node right) {
-            this.ch    = ch;
-            this.freq  = freq;
-            this.left  = left;
+            this.ch = ch;
+            this.freq = freq;
+            this.left = left;
             this.right = right;
         }
 
         // is the node a leaf node?
         private boolean isLeaf() {
-            assert ((left == null) && (right == null)) || ((left != null) && (right != null));
             return (left == null) && (right == null);
         }
 
@@ -56,11 +55,35 @@ public final class Huffman {
                 else
                     letterCount.replace(asciiChar, letterCount.get(asciiChar) + 1);
             }
-         } catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         Node root = buildTree();
+
+        String[] codeLibrary = new String[SIZE];
+        buildCode(codeLibrary, root, "");
+
+        writeCode(codeLibrary, codeFilename);
+
+        PrintWriter writer = null;
+        RandomAccessFile fin = null;
+        try {
+            writer = new PrintWriter(codeFilename);
+            fin = new RandomAccessFile(new File(originalFilename), "r");
+            int b = (int) fin.read();
+
+            while (b != -1) {
+                String charactersCode = Files.readAllLines(Paths.get(codeFilename)).get(b);
+                writer.println(charactersCode);
+                b = fin.read();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
 
     }
 
@@ -73,7 +96,6 @@ public final class Huffman {
         PriorityQueue<Node> pq = new PriorityQueue<>();
         for (char i = 0; i < SIZE; i++) {
             if(letterCount.containsKey(i)) {
-                System.out.println(i);
                 int freq = letterCount.get(i);
                 pq.add(new Node(i, freq, null, null));
             }
@@ -89,7 +111,31 @@ public final class Huffman {
         return pq.remove();
     }
 
-    private static Node buildTable() {
+    private static void buildCode(String[] codeLibrary, Node node, String currentCode) {
+        if (!node.isLeaf()) {
+            buildCode(codeLibrary, node.left,  currentCode + '0');
+            buildCode(codeLibrary, node.right, currentCode + '1');
+        }
+        else {
+            codeLibrary[node.ch] = currentCode;
+        }
+
+    }
+
+    private static void writeCode(String[] codeLibrary, String codeFilename) {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(codeFilename);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        assert writer != null;
+        for (String code:codeLibrary) {
+            writer.println(code);
+        }
+        writer.close();
+
 
     }
 
