@@ -1,9 +1,4 @@
-import javax.swing.tree.TreeNode;
-import javax.xml.soap.Node;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.TreeMap;
 
@@ -11,6 +6,7 @@ public final class Huffman {
 
     private static TreeMap<Character, Integer> letterCount = new TreeMap<>();
     private static final int SIZE = 256; //Size of the ASCII library
+    private static String[] codeLibrary = new String[SIZE];
 
     private Huffman() { }
 
@@ -61,30 +57,30 @@ public final class Huffman {
 
         Node root = buildTree();
 
-        String[] codeLibrary = new String[SIZE];
         buildCode(codeLibrary, root, "");
 
         writeCode(codeLibrary, codeFilename);
 
-        PrintWriter writer = null;
-        RandomAccessFile fin = null;
-        try {
-            writer = new PrintWriter(codeFilename);
-            fin = new RandomAccessFile(new File(originalFilename), "r");
-            int b = (int) fin.read();
+        BitOutputStream bos = new BitOutputStream(compressedFilename);
 
-            while (b != -1) {
-                String charactersCode = Files.readAllLines(Paths.get(codeFilename)).get(b);
-                writer.println(charactersCode);
-                b = fin.read();
+        try {
+            RandomAccessFile fin = new RandomAccessFile(new File(originalFilename), "r");
+            int currentChar = 0;
+            currentChar = (int) fin.read();
+            while (currentChar != -1) {
+                for(int i = 0; i < SIZE; i++) {
+                    if(currentChar == i) {
+                        String code = codeLibrary[currentChar];
+                        bos.writeString(code);
+                    }
+                }
+
+                currentChar = fin.read();
             }
+            bos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
-
     }
 
     public static void decode (String compressedFilename, String codeFilename, String decompressedFilename ) {
@@ -131,13 +127,14 @@ public final class Huffman {
         }
 
         assert writer != null;
+        int ascii_code = 0;
         for (String code:codeLibrary) {
-            writer.println(code);
+            if(code != null) {
+                int freq = letterCount.get((char)ascii_code);
+                writer.println(ascii_code + " " + freq + " " + code);
+            }
+            ascii_code++;
         }
         writer.close();
-
-
     }
-
-
 }
