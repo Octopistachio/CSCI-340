@@ -30,12 +30,21 @@ public final class Huffman {
             this.right = right;
         }
 
-        //Returns if the node is a leaf node
+        /**
+         * Check to see if the current node is a leaf node
+         *
+         * @return True, if both nodes to the left and right are null
+         */
         private boolean isLeaf() {
             return (left == null) && (right == null);
         }
 
-        //Compare the two nodes based on frequency
+        /**
+         * Compares two nodes based on frequency
+         *
+         * @param that A node
+         * @return The difference between the nodes' frequency
+         */
         public int compareTo(Node that) {
             return this.freq - that.freq;
         }
