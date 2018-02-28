@@ -2,8 +2,6 @@
  * Compress and decompress a file using
  * Huffman codes
  *
- * NOTE: decompression does not work
- *
  * @author Matthew Wilson
  * @date 2/20/18
  */
@@ -59,7 +57,7 @@ public final class Huffman {
             int asciiInt = fin.read(); //Read the ascii value of the current character
             char asciiChar; //Convert the ascii value to a character
 
-            while (asciiInt != -1) {
+            while (asciiInt != -1) { //While the end of the file isn't reached
                 asciiInt = fin.read();
                 asciiChar = (char) asciiInt;
 
@@ -98,41 +96,75 @@ public final class Huffman {
         }
     }
 
+    /**
+     * Decode a file that was encrypted
+     * using Huffman codes
+     *
+     * @param compressedFilename
+     * @param codeFilename
+     * @param decompressedFilename
+     */
     public static void decode(String compressedFilename, String codeFilename, String decompressedFilename) {
 
-        String[] decodeLibrary = new String[SIZE];
+        String[] decodeLibrary = new String[SIZE]; //The library of each huffman code
 
         try {
-            RandomAccessFile fin = new RandomAccessFile(new File(codeFilename), "r");
+            RandomAccessFile fin = new RandomAccessFile(new File(codeFilename), "r"); //The code table file reader
 
-            int asciiInt = fin.read();
-            char asciiChar;
+            int asciiInt = fin.read(); //Read the ascii value of the current character
+            char asciiChar; //Convert the ascii value to a character
 
-            int spaces = 0;
-            int location = 0;
-            String code = "";
+            int spaces = 0; //The number of spaces
+            int location = 0; //The index of the code
+            String code = ""; //The code
 
-            while (asciiInt != -1) {
+            while (asciiInt != -1) { //While the end of the file isn't reached
 
                 asciiChar = (char) asciiInt;
 
-                if (asciiChar == ' ')
-                    spaces++;
-                else if (asciiChar == '\n') {
-                    spaces = 0;
-                    decodeLibrary[location] = code;
-                    location = 0;
-                    code = "";
-                } else if (spaces == 2) {
-                    code += asciiChar;
-                } else if (spaces == 0) {
-                    location = location * 10 + Character.getNumericValue(asciiChar);
+                if (asciiChar == ' ') { //If the current character is a space
+                    spaces++; //Increase spaces by 1
+                } else if (asciiChar == '\n') { //If the current character is a new line
+                    spaces = 0; //Reset spaces
+                    code = code.replaceAll("[^\\d.]", ""); //Delete all non-integers from the code
+                    decodeLibrary[location] = code; //Add the code to the decode library
+                    location = 0; //Reset the index
+                    code = ""; //Reset the code
+                } else if (spaces == 2) { //If there are two spaces
+                    code += asciiChar; //Add the integer to the code
+                } else if (spaces == 0) { //If there are no spaces
+                    location = location * 10 + Character.getNumericValue(asciiChar); //Set the index to the value in the table
                 }
-                asciiInt = fin.read();
+                asciiInt = fin.read(); //Read the next ascii value
             }
-        } catch (IOException e) {
+        } catch (IOException e) { //Catch any FileNotFound errors
             e.printStackTrace();
         }
+
+
+        PrintWriter writer = null; //Instantiate the writer
+        try {
+            writer = new PrintWriter(decompressedFilename); //Create a new file
+        } catch (FileNotFoundException e) { //Catch errors
+            e.printStackTrace();
+        }
+        assert writer != null; //Make sure the writer is not null
+
+        BitInputStream bis = new BitInputStream(compressedFilename); //Read the compressed file
+        int bit = bis.readBit(); //Read the first bit
+        String code = ""; //The current code
+        while (bit != -1) { //While there are still bits
+            code += bit; //Add the bit to the code
+
+            for (int i = 0; i < decodeLibrary.length; i++) { //For each code in the decode library
+                    if (code.equals(decodeLibrary[i])) { //Check to see if the current code exists in the decode library
+                        writer.print((char) i); //Convert i to an ascii value and write it to the decompressed file
+                        code = ""; //Reset the code
+                    }
+                }
+            bit = bis.nextBit(); //Read the next bit
+        }
+        writer.close(); //Close the writer
     }
 
     /**
@@ -179,7 +211,7 @@ public final class Huffman {
     /**
      * Write the code to a file
      *
-      * @param codeLibrary The array of each huffman code
+     * @param codeLibrary The array of each huffman code
      * @param codeFilename The name of the code's file
      */
     private static void writeCode(String[] codeLibrary, String codeFilename) {
