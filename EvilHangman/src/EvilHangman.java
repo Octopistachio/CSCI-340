@@ -10,9 +10,8 @@ import java.util.Scanner;
 public class EvilHangman {
 
 
-
     private static ArrayList<String> library = new ArrayList<>();
-    private static ArrayList<String> wordFamilyLibrary = new ArrayList<>();
+    private static ArrayList<String> lengthLibrary = new ArrayList<>(); //Library of all words that contain the length chosen
     private static int maxWordLength = 0;
 
     public static void main(String args[]) {
@@ -27,12 +26,13 @@ public class EvilHangman {
             System.out.print("Enter word length: ");
             wordLength = sc.nextInt();
 
-            if(wordLength > maxWordLength) throw new ExceedsMaxLengthException(wordLength + " is too long of a word length");
+            if (wordLength > maxWordLength)
+                throw new ExceedsMaxLengthException(wordLength + " is too long of a word length");
 
             System.out.print("Enter guess length: ");
             guessLength = sc.nextInt();
 
-            if(guessLength <= 0) throw new TooFewGuessesException(guessLength + " is less than 0");
+            if (guessLength <= 0) throw new TooFewGuessesException(guessLength + " is less than 0");
 
             System.out.print("Show available words? (y/n): ");
             String showAvailableWordsString = sc.next().toUpperCase();
@@ -47,12 +47,10 @@ public class EvilHangman {
                 default:
                     throw new NotYNException("Input must be \"y\" or \"n\"");
             }
-        }
-        catch (InputMismatchException e) {
+        } catch (InputMismatchException e) {
             System.err.println("Length must be an integer");
             System.exit(0);
-        }
-        catch (TooFewGuessesException | ExceedsMaxLengthException | NotYNException e) {
+        } catch (TooFewGuessesException | ExceedsMaxLengthException | NotYNException e) {
             System.err.println(e);
             System.exit(0);
         }
@@ -71,13 +69,11 @@ public class EvilHangman {
 
             while ((line = bufferedReader.readLine()) != null) {
                 library.add(line.toUpperCase());
-                if(line.length() > maxWordLength) maxWordLength = line.length();
+                if (line.length() > maxWordLength) maxWordLength = line.length();
             }
-        }
-        catch(FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             System.err.println("Unable to open file '" + fileName + "'");
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
             System.err.println("Error reading file '" + fileName + "'");
         }
 
@@ -92,14 +88,12 @@ public class EvilHangman {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             while ((line = bufferedReader.readLine()) != null) {
-                if(line.length() == wordLength)
-                    wordFamilyLibrary.add(line.toUpperCase());
+                if (line.length() == wordLength)
+                    lengthLibrary.add(line.toUpperCase());
             }
-        }
-        catch(FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             System.err.println("Unable to open file '" + fileName + "'");
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
             System.err.println("Error reading file '" + fileName + "'");
         }
 
@@ -112,23 +106,20 @@ public class EvilHangman {
         Scanner sc = new Scanner(System.in);
         ArrayList<Character> guessedLetters = new ArrayList<>();
 
-        while(guessCount < guessLength) {
+        while (guessCount < guessLength) {
             print(wordLength, guessLength, showAvailableWords, guessCount, guessedLetters, findFamilies(wordLength, guessedLetters));
             System.out.print("\nGuess a letter: ");
             String guessedLetterString = sc.next().toUpperCase();
             char guessedLetter = guessedLetterString.charAt(0);
 
 
-            if(guessedLetterString.length() > 1) {
+            if (guessedLetterString.length() > 1) {
                 System.err.println("Please only input one character");
-            }
-            else if(!Character.isLetter(guessedLetter)){
+            } else if (!Character.isLetter(guessedLetter)) {
                 System.err.println("Please only input letters");
-            }
-            else if(guessedLetters.contains(guessedLetter)){
+            } else if (guessedLetters.contains(guessedLetter)) {
                 System.err.println("You have already guessed that letter");
-            }
-            else {
+            } else {
                 guessedLetters.add(guessedLetter);
                 guessCount++;
             }
@@ -142,18 +133,17 @@ public class EvilHangman {
 
         System.out.println();
 
-        if(showAvailableWords)
+        if (showAvailableWords)
             System.out.println("Possible words: ");
         System.out.println("Guesses remaining: " + (guessLength - guessCount));
         System.out.println("Guessed letters: " + guessedLetters);
         System.out.print("Current state: ");
 
 
-        for(int i = 0; i < wordLength; i++) {
-            if(word[i] == '\u0000') {
+        for (int i = 0; i < wordLength; i++) {
+            if (word[i] == '\u0000') {
                 System.out.print("_ ");
-            }
-            else {
+            } else {
                 System.out.print(word[i] + " ");
             }
         }
@@ -162,16 +152,46 @@ public class EvilHangman {
     private static char[] findFamilies(int wordLength, ArrayList<Character> guessedLetters) {
         char[] nothing = new char[wordLength];
 
-        ArrayList<String> tempWordFamilyLibrary = new ArrayList<>();
+        ArrayList<String> notGuessedLetterLibrary = new ArrayList<>();
+        ArrayList<char[]> guessedLetterLibrary = new ArrayList<>();
 
-        for (String word:wordFamilyLibrary) {
-            for (char letter:guessedLetters) {
-                for(int i = 0; i < word.length(); i++) {
-                    if(word.charAt(i) == letter) {
-                        System.out.println(word);
-                    }
+        char lastLetterGuessed = '\u0000';
+
+        if(guessedLetters.size() != 0)
+               lastLetterGuessed = guessedLetters.get(guessedLetters.size() - 1);
+
+        for (String word : lengthLibrary) {
+            boolean containsGuessedLetter = false;
+            for (int i = 0; i < word.length(); i++) {
+                if (word.charAt(i) == lastLetterGuessed) {
+                    containsGuessedLetter = true;
+                    break;
                 }
             }
+            char[] strippedWord = new char[wordLength];
+            if (containsGuessedLetter) {
+                for (int i = 0; i < word.length(); i++) {
+                    if (word.charAt(i) == lastLetterGuessed) {
+                        strippedWord[i] = lastLetterGuessed;
+                    }
+                }
+                guessedLetterLibrary.add(strippedWord);
+
+            } else {
+                notGuessedLetterLibrary.add(word);
+            }
+        }
+
+
+        for(char[] word : guessedLetterLibrary) {
+            int uniques = 0; //Number of unique combinations
+            for(char[] word2 : guessedLetterLibrary) {
+                if(word == word2) {
+                    uniques++;
+                    guessedLetterLibrary.remove(word2);
+                }
+            }
+            System.out.println(uniques);
         }
 
         return nothing;
