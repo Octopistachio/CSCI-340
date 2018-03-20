@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.SourceTree;
+
 import java.io.BufferedReader;
 
 import java.io.FileNotFoundException;
@@ -113,9 +115,12 @@ public class EvilHangman {
 
 
         char[] word = new char[wordLength];
+        boolean gameOver = false;
+        boolean defeat = false;
+        while (!gameOver) {
 
-        while (guessCount < guessLength) {
             word = findFamilies(word, guessedLetters);
+            Collections.sort(guessedLetters);
             print(wordLength, guessLength, showAvailableWords, guessCount, guessedLetters, word);
             System.out.print("\nGuess a letter: ");
             String guessedLetterString = sc.next().toUpperCase();
@@ -132,7 +137,34 @@ public class EvilHangman {
                 guessedLetters.add(guessedLetter);
                 guessCount++;
             }
+
+            char[] lettersLeft = new char[wordLength];
+            for (char letter:guessedLetters) {
+                for(int i = 0; i < word.length; i++) {
+                    if(word[i] == letter) {
+                        lettersLeft[i] = letter;
+                    }
+                }
+            }
+
+            if(Arrays.equals(lettersLeft, word)) {
+                defeat = false;
+                break;
+            }
+
+            if(guessCount == guessLength) {
+                gameOver = true;
+                defeat = true;
+            }
         }
+
+        System.out.println();
+        if(defeat) {
+            System.out.println("You lost!");
+        } else {
+            System.out.println("You win!");
+        }
+        System.out.println("Your word was: \'" + String.valueOf(word) + "\'");
 
     }
 
@@ -164,7 +196,7 @@ public class EvilHangman {
 
     private static char[] findFamilies(char[] currentWord, List<Character> guessedLetters) {
 
-        HashMap<String, List<String>> wordMap = new HashMap<>(); //<Pattern, Words>
+        HashMap<String, List<String>> wordMap = new HashMap<>(); //A hashmap of all families
 
         char lastLetterGuessed = '\u0000'; //The last word guessed by the player
 
@@ -187,13 +219,19 @@ public class EvilHangman {
                 }
             }
             if(!containsAlreadyGuessedLetter) { //If the word does NOT contain a letter that was already guessed
-                String strippedWord = word;
-                if (containsLastGuessedLetter) {
-                    for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == lastLetterGuessed) {
-                            strippedWord += lastLetterGuessed;
-                        } else {
-                            strippedWord += "-";
+                String strippedWord = word; //The word, but stripped of all characters besides the ones guessed
+                if (containsLastGuessedLetter) { //If the word contains the last letter guessed
+                    for (int i = 0; i < word.length(); i++) { //For each letter in the word
+                        if (word.charAt(i) == lastLetterGuessed) { //If the letter is the last letter guessed
+                            strippedWord += lastLetterGuessed; //Add it to the stripped word
+                        }
+                        else {
+                            for(char letter:currentWord) {
+                                if(word.charAt(i) == letter)
+                                    strippedWord += letter;
+                                else
+                                    strippedWord += "-"; //Add a dash
+                            }
                         }
                     }
                     if (wordMap.containsKey(strippedWord)) {
@@ -222,21 +260,23 @@ public class EvilHangman {
 
         String biggestFamily = "";
         int biggestFamilyCount = 0;
-        for (String key:wordMap.keySet()) {
+        for (String key: wordMap.keySet()) {
             if(wordMap.get(key).size() > biggestFamilyCount) {
                 biggestFamilyCount = wordMap.get(key).size();
                 biggestFamily = key;
             }
         }
 
-        int total = 0;
-        for (List<String> list : wordMap.values()) {
-            total += list.size();
-        }
-        availableWords = total;
+        availableWords = biggestFamilyCount;
 
-        System.out.println(wordMap.get(biggestFamily));
-        String chosenWord = wordMap.get(biggestFamily).get(0);
+        String chosenWord;
+        if(!wordMap.isEmpty())
+            chosenWord = wordMap.get(biggestFamily).get(0);
+        else {
+            availableWords = 1;
+            chosenWord = String.valueOf(currentWord);
+        }
+
         return chosenWord.toCharArray();
 
     }

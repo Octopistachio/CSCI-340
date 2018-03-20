@@ -9,24 +9,27 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/CSCI_340$EvilHangman.coverage" NAME="EvilHangman Coverage Results" MODIFIED="1521579221887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="EvilHangman.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EvilHangman/src/EvilHangman.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="161" column="9" lean-forward="true" selection-start-line="161" selection-start-column="9" selection-end-line="161" selection-end-column="9" />
+            <state relative-caret-position="267">
+              <caret line="150" column="31" lean-forward="false" selection-start-line="150" selection-start-column="31" selection-end-line="150" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="class#ExceedsMaxLengthException#0;class#EvilHangman#0" expanded="false" />
-                <element signature="e#9436#9437#0" expanded="true" />
-                <element signature="e#9474#9475#0" expanded="true" />
+                <element signature="e#10907#10908#0" expanded="true" />
+                <element signature="e#10945#10946#0" expanded="true" />
                 <element signature="class#TooFewGuessesException#0;class#EvilHangman#0" expanded="false" />
-                <element signature="e#9598#9599#0" expanded="true" />
-                <element signature="e#9636#9637#0" expanded="true" />
+                <element signature="e#11069#11070#0" expanded="true" />
+                <element signature="e#11107#11108#0" expanded="true" />
                 <element signature="class#NotYNException#0;class#EvilHangman#0" expanded="false" />
-                <element signature="e#9744#9745#0" expanded="true" />
-                <element signature="e#9782#9783#0" expanded="true" />
+                <element signature="e#11215#11216#0" expanded="true" />
+                <element signature="e#11253#11254#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -51,6 +54,7 @@
       <find>.SIZ</find>
       <find>print</find>
       <find>print(</find>
+      <find>availableWords</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -98,7 +102,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -126,9 +129,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="AndroidView" />
       <pane id="PackagesPane" />
+      <pane id="AndroidView" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -360,6 +364,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32464147" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.084375" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -701,19 +706,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/EvilHangman/src/EvilHangman.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="161" column="9" lean-forward="true" selection-start-line="161" selection-start-column="9" selection-end-line="161" selection-end-column="9" />
+        <state relative-caret-position="267">
+          <caret line="150" column="31" lean-forward="false" selection-start-line="150" selection-start-column="31" selection-end-line="150" selection-end-column="31" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="class#ExceedsMaxLengthException#0;class#EvilHangman#0" expanded="false" />
-            <element signature="e#9436#9437#0" expanded="true" />
-            <element signature="e#9474#9475#0" expanded="true" />
+            <element signature="e#10907#10908#0" expanded="true" />
+            <element signature="e#10945#10946#0" expanded="true" />
             <element signature="class#TooFewGuessesException#0;class#EvilHangman#0" expanded="false" />
-            <element signature="e#9598#9599#0" expanded="true" />
-            <element signature="e#9636#9637#0" expanded="true" />
+            <element signature="e#11069#11070#0" expanded="true" />
+            <element signature="e#11107#11108#0" expanded="true" />
             <element signature="class#NotYNException#0;class#EvilHangman#0" expanded="false" />
-            <element signature="e#9744#9745#0" expanded="true" />
-            <element signature="e#9782#9783#0" expanded="true" />
+            <element signature="e#11215#11216#0" expanded="true" />
+            <element signature="e#11253#11254#0" expanded="true" />
           </folding>
         </state>
       </provider>
