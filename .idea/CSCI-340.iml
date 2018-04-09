@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/SeamCarver/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Huffman/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/EvilHangman/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/LZW/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
