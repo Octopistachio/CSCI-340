@@ -14,27 +14,23 @@ import java.util.Scanner;
 public class LZWCompression {
 
     private static HashMap<String, Integer> dictionary = new HashMap<>();
+    private static String fileName;
 
     public static void main(String[] args) {
 
         InitializeDictionary();
 
-        System.out.println(dictionary);
-
         Scanner sc = new Scanner(System.in);
 
         System.out.print("File to compress: ");
-        String fileName = sc.nextLine();
+        fileName = sc.nextLine();
 
         try {
-            RandomAccessFile fin = new RandomAccessFile(new File(fileName), "r");
-            Compress(fin);
+            Compress();
         }
-        catch (IOException e){
+        catch (IOException e) {
             System.err.println(e);
         }
-
-        System.out.println(dictionary);
 
     }
 
@@ -45,31 +41,33 @@ public class LZWCompression {
         }
     }
 
-    private static void Compress(RandomAccessFile fin) throws IOException{
+    private static void Compress() throws IOException{
+
+        RandomAccessFile fin = new RandomAccessFile(new File(fileName), "r");
+        RandomAccessFile lzwFile = new RandomAccessFile(new File(fileName + ".lzw"), "rw");
+
         String str = "";
 
-        int nextCh = fin.read(); //The next character
-        int ch = nextCh; //The current character
+        int ch = fin.read(); //The next character
+        int index = dictionary.size() - 1;
 
         while (ch != -1) {
 
-            int index = dictionary.size();
 
             if(dictionary.size() != 256) {
-                if (dictionary.containsKey(str + (char)nextCh)) {
-                    str = str + (char) nextCh;
-                    dictionary.put(str, index);
-                    System.out.println("IF: " + str);
+                if (dictionary.containsKey(str + (char)ch)) {
+                    str += (char) ch;
                 } else {
-                    System.out.println(dictionary.get(str));
-                    dictionary.put(str + (char)nextCh, index);
-                    str = String.valueOf((char)nextCh);
-                    System.out.println("ELSE: " + str);
+                    index++;
+                    dictionary.put(str + (char)ch, index);
+                    lzwFile.writeByte(dictionary.get(str));
+                    str = String.valueOf((char)ch);
                 }
             }
 
-            nextCh = fin.read(); //The character after this one
-            ch = nextCh; //Set the current character to the next one
+            ch = fin.read(); //Set the current character to the next one
         }
+
+        lzwFile.close();
     }
 }
