@@ -44,7 +44,7 @@ public class LZWCompression {
     private static void Compress() throws IOException{
 
         RandomAccessFile fin = new RandomAccessFile(new File(fileName), "r");
-        RandomAccessFile lzwFile = new RandomAccessFile(new File(fileName + ".lzw"), "rw");
+        RandomAccessFile lzw = new RandomAccessFile(new File(fileName + ".lzw"), "rw");
 
         String str = "";
 
@@ -60,7 +60,8 @@ public class LZWCompression {
                 } else {
                     index++;
                     dictionary.put(str + (char)ch, index);
-                    lzwFile.writeByte(dictionary.get(str));
+                    lzw.writeByte(dictionary.get(str));
+                    System.out.println(index);
                     str = String.valueOf((char)ch);
                 }
             }
@@ -68,6 +69,10 @@ public class LZWCompression {
             ch = fin.read(); //Set the current character to the next one
         }
 
-        lzwFile.close();
+        lzw.close();
+
+
+
     }
+
 }
