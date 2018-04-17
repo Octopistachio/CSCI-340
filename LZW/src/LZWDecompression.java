@@ -14,80 +14,77 @@ import java.util.Scanner;
 public class LZWDecompression {
 
 
-    private static HashMap<String, Integer> dictionary = new HashMap<>();
-    private static String fileName;
+    private static HashMap<Integer, String> dictionary = new HashMap<>();  //The dictionary of the indexes and their strings
+    private static String fileName;  //The name of the file to be decompressed
 
     public static void main(String[] args) {
 
+        Scanner sc = new Scanner(System.in);  //The user's input
+
+        System.out.print("File to decompress: ");
+        fileName = sc.nextLine();  //The name of the file to be decompressed
+
+        InitializeDictionary();
 
         try {
-            InitializeDictionary();
-
-            Scanner sc = new Scanner(System.in);
-
-            System.out.print("File to decompress: ");
-            fileName = sc.nextLine();
-
-
-            Decompress();
+            Decompress(); //Decompress the file
         }
         catch (IOException e) {
             System.err.println(e);
         }
+        catch (IllegalArgumentException e) {
+            System.err.println("File name must end in the extension \".lzw\"");
+        }
 
     }
 
-    private static void InitializeDictionary() throws IOException {
-
-        RandomAccessFile bin = new RandomAccessFile(new File("output.bin"), "rw");
-
-        for (int ch = 0; ch <= 127; ch++) {
-            String str = String.valueOf((char) ch);
-            dictionary.put(str, ch);
+    /**
+     * Initialize the dictionary with the basic ascii values
+     */
+    private static void InitializeDictionary() {
+        for (int ch = 0; ch <= 127; ch++) { //For every ascii character
+            String str = String.valueOf((char) ch); //Convert the number to a string
+            dictionary.put(ch, str); //Add it to the dictionary
         }
-
-        int ch = bin.read(); //The next character
-
-        while (ch != -1) {
-            System.out.println(ch);
-            ch = bin.read();
-        }
-
-        bin.close();
     }
 
-    private static void Decompress() throws IOException{
+    /**
+     * Deompress the file using LZW
+     *
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    private static void Decompress() throws IOException, IllegalArgumentException{
 
-        RandomAccessFile fin = new RandomAccessFile(new File(fileName), "r");
-        RandomAccessFile lzw = new RandomAccessFile(new File(fileName + ".lzw"), "rw");
+        RandomAccessFile lzw = new RandomAccessFile(new File(fileName), "r"); //The file that is being read
+        if(!fileName.contains(".lzw")) throw new IllegalArgumentException(); //If it is not a .lzw file, throw an error
 
-        String str = "";
-
-        int ch = fin.read(); //The next character
-        int index = dictionary.size() - 1;
-
-        while (ch != -1) {
+        String decompFileName = fileName.replace(".lzw", ".decomp"); //Remove .lzw from the file name
+        RandomAccessFile fin = new RandomAccessFile(new File(decompFileName), "rw"); //The file that is being written to
 
 
-            if(dictionary.size() != 256) {
-                if (dictionary.containsKey(str + (char)ch)) {
-                    str += (char) ch;
-                } else {
-                    index++;
-                    dictionary.put(str + (char)ch, index);
-                    lzw.writeByte(dictionary.get(str));
-                    System.out.println(index);
-                    str = String.valueOf((char)ch);
+
+        String str = ""; //The running string
+
+        int ch = lzw.read(); //The next character
+        int index = dictionary.size() - 1; //The index of the current ascii character (or characters)
+        while (ch != -1) { //While the end of the file has not been reached
+            if(dictionary.size() < 256) { //If the dictionary has not reached a maximum size of 256
+                if (dictionary.containsValue(str + (char)ch)) {  //If the dictionary contains the string and the next character
+                    fin.writeBytes(dictionary.get(ch)); //Write it to the file
+                    str += (char) ch; //Add the character to the string
+                } else { //If the dictionary does NOT contain the string and the next character
+                    index++; //Increase the index by 1
+                    dictionary.put(index, str + (char)ch); //Add the string and the next character to the dictionary
+                    fin.writeBytes(dictionary.get(ch)); //Write the string to the file
+                    str = String.valueOf((char)ch); //Set the string to the next character
                 }
             }
 
-            ch = fin.read(); //Set the current character to the next one
+            ch = lzw.read(); //Set the current character to the next one
         }
 
-        lzw.close();
-
-
-
+        fin.close();
     }
 
 }
