@@ -7,20 +7,18 @@
  * @date 4/25/2018
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Sudoku {
 
+    private static String fileName; //Name of the file to be solved
     private static final int[][] ORIGINAL = new int[9][9]; //The original puzzle
     private static int[][] temporary = new int[9][9]; //The puzzle as it is solved by the program
 
     public static void main(String[] args) {
 
-        String fileName; //Name of the file to be solved
         RandomAccessFile sdk = null; //Initializer for the .sdk file
 
         try {
@@ -40,11 +38,14 @@ public class Sudoku {
         readSdk(sdk); //Read through the .sdk file
         solve(); //Solve the puzzle
         print(temporary); //Print the solution to the console
+        output(temporary); //Output the solution
     }
 
     /**
+     * Read through the .sdk file
+     * and add it to the ORIGINAL
      *
-     * @param sdk
+     * @param sdk The .sdk file to solve
      */
     private static void readSdk(RandomAccessFile sdk) {
         try {
@@ -62,7 +63,6 @@ public class Sudoku {
                     ORIGINAL[row][col] = Integer.valueOf(String.valueOf(digit)); //Add the character, changed to its corresponding integer, to the original puzzle
                     col++; //Add a new column
                 }
-
                 value = sdk.read(); //Read the next value
             }
         } catch (IOException e) { //Catch any IOExceptions
@@ -73,17 +73,20 @@ public class Sudoku {
     }
 
     /**
-     *
+     * The tail end of the
+     * solve recursion
      */
     private static void solve() {
         solve(0, 0);
     }
 
     /**
+     * The recursive method that
+     * solves the puzzle
      *
-     * @param row
-     * @param col
-     * @return
+     * @param row The current row
+     * @param col The current col
+     * @return The completed puzzle
      */
     private static int[][] solve(int row, int col) {
 
@@ -92,14 +95,14 @@ public class Sudoku {
         }
 
         /* Row and Column Counting*/
-        if(row == 8 && col == 8) return temporary; //Base case
+        if(row == 8 && col == 8) return temporary; //Base case, if the solver is in the final slot
         else {
-            if(col == 8) {
-                row++;
-                col = -1;
+            if(col == 8) { //If the solver has reached the last column
+                row++; //Increase the row by 1
+                col = -1; //Set the column to -1 (to avoid errors)
             }
-            col++;
-            return solve(row, col);
+            col++; //Increase the column by 1
+            return solve(row, col); //Solve again, with the new values
         }
     }
 
@@ -107,14 +110,15 @@ public class Sudoku {
      * Check the slot to see what value
      * can be input into it
      *
-     * @param row
-     * @param col
-     * @return
+     * @param row The current row
+     * @param col The current col
+     * @return The value of the current slot
      */
     private static int slotCheck(int row, int col) {
         for(int value = 1; value <= 9; value++) { //For every number, 1 through 9
             if(rowCheck(row, value) && colCheck(col, value) && blockCheck(row, col, value)) { //Check every row, column, and block to see if it is unique in that slot
-                return value; }
+                return value;
+            }
         }
         return -1; //If it is invalid, return -1
     }
@@ -123,51 +127,51 @@ public class Sudoku {
      * Checks the other values in the row to
      * see if this value is able to be used
      *
-     * @param row
-     * @param value
-     * @return
+     * @param row The current row
+     * @param value The value to check
+     * @return If the value is valid
      */
     private static boolean rowCheck(int row, int value) {
-        List<Integer> arr = new ArrayList<>();
-        for(int col = 0; col < temporary[0].length; col++) {
-            if(temporary[row][col] != 0) {
-                arr.add(temporary[row][col]);
+        List<Integer> arr = new ArrayList<>(); //List of all numbers in the row
+        for (int col = 0; col < temporary[0].length; col++) { //For each value in the row
+            if (temporary[row][col] != 0) { //If the number is not 0
+                arr.add(temporary[row][col]); //Add it to the list
             }
         }
 
-        return !arr.contains(value);
+        return !arr.contains(value); //Return true if the value chosen is not in the list
     }
 
     /**
      * Checks the other values in the column to
      * see if this value is able to be used
      *
-     * @param col
-     * @param value
-     * @return
+     * @param col The current column
+     * @param value The value to check
+     * @return If the value is valid
      */
     private static boolean colCheck(int col, int value) {
-        List<Integer> arr = new ArrayList<>();
-        for(int row = 0; row < temporary.length; row++) {
-            if(temporary[row][col] != 0) {
-                arr.add(temporary[row][col]);
+        List<Integer> arr = new ArrayList<>(); //List of all numbers in the column
+        for(int row = 0; row < temporary.length; row++) { //For each value in the column
+            if(temporary[row][col] != 0) { //If the number is not 0
+                arr.add(temporary[row][col]); //Add it to the list
             }
         }
 
-        return !arr.contains(value);
+        return !arr.contains(value); //Return true if the value chosen is not in the list
     }
 
     /**
      * Checks the other values in the block to
      * see if this value is able to be used
      *
-     * @param row
-     * @param col
-     * @param value
-     * @return
+     * @param row The current row
+     * @param col The current column
+     * @param value The value to check
+     * @return If the value is valid
      */
     private static boolean blockCheck(int row, int col, int value) {
-        List<Integer> arr = new ArrayList<>();
+        List<Integer> arr = new ArrayList<>(); //List of all numbers in the block
 
         /*
         0 1 2
@@ -175,62 +179,89 @@ public class Sudoku {
         6 7 8
         */
 
-        int block;
+        int block; //The block of the puzzle
 
-        if(row <= 2) {
-            if(col <= 2) block = 0;
-            else if(col <= 5) block = 1;
-            else block = 2;
+        if(row <= 2) { //If the row if less than 2
+            if(col <= 2) block = 0; //If the column is less than 2, set the block to 0
+            else if(col <= 5) block = 1; //If the column is less than 5, set the block to 1
+            else block = 2; //Else, set the block to 2
         }
-        else if(row <= 5) {
-            if(col <= 2) block = 3;
-            else if(col <= 5) block = 4;
-            else block = 5;
+        else if(row <= 5) { //If the row is less than 5
+            if(col <= 2) block = 3; //If the column is less than 2, set the block to 3
+            else if(col <= 5) block = 4; //If the column is less than 5, set the block to 4
+            else block = 5; //Else, set the block to 5
         }
         else {
-            if(col <= 2) block = 6;
-            else if(col <= 5) block = 7;
-            else block = 8;
+            if(col <= 2) block = 6; //If the column is less than 2, set the block to 6
+            else if(col <= 5) block = 7; //If the column is less than 5, set the block to 7
+            else block = 8; //Else, set the block to 8
         }
 
-        int rStart, cStart;
-        int rStop, cStop;
-        if(block < 2) rStart = 0;
-        else if(block < 5) rStart = 3;
-        else rStart = 6;
+        int rStart, cStart; //The row and column to start at
+        int rStop, cStop; //The row and column to stop at
 
-        if(block == 0 || block == 3 || block == 6) cStart = 0;
-        else if(block == 1 || block == 4 || block == 7) cStart = 3;
-        else cStart = 6;
+        if(block <= 2) rStart = 0; //If the current block is on the top, set the starting row to 0
+        else if(block <= 5) rStart = 3; //If the current block is in the middle, set the starting row to 3
+        else rStart = 6; //If the current block is on the bottom, set the starting row to 6
 
-        rStop = rStart + 2;
-        cStop = cStart + 2;
+        if(block == 0 || block == 3 || block == 6) cStart = 0; //If the current block is on the left, set the starting column to 0
+        else if(block == 1 || block == 4 || block == 7) cStart = 3; //If the current block is in the middle, set the starting column to 3
+        else cStart = 6; //If the current block is on the right, set the starting column to 6
 
-        for(int r = rStart; r <= rStop; r++) {
-            for(int c = cStart; c <= cStop; c++) {
-                if(temporary[r][c] != 0) {
-                    arr.add(temporary[r][c]);
+        rStop = rStart + 2; //Set the stopping row to the start plus 2
+        cStop = cStart + 2; //Set the stopping column to the start plus 2
+
+        for(int r = rStart; r <= rStop; r++) { //For each row in the block
+            for(int c = cStart; c <= cStop; c++) { //For each column in the block
+                if(temporary[r][c] != 0) { //If the current block is not empty
+                    arr.add(temporary[r][c]); //Add it to the list
                 }
             }
         }
-        return !arr.contains(value);
+        return !arr.contains(value); //Return true if the value chosen is not in the list
     }
 
     /**
      * Print the puzzle to the console
      *
-     * @param puzzle
+     * @param puzzle The puzzle to print
      */
     private static void print(int[][] puzzle) {
-        for(int row = 0; row < puzzle.length; row++){ //For every row
-            for(int col = 0; col < puzzle[0].length; col++) { //For every column
+        for(int row = 0; row < puzzle.length; row++) { //For every row
+            for (int col = 0; col < puzzle[0].length; col++) { //For every column
                 System.out.print(puzzle[row][col] + " "); //Print out the value, and add a space
-                if(col == 2 || col == 5) System.out.print(" "); //If it is the end of a block, add a space
+                if (col == 2 || col == 5) System.out.print(" "); //If it is the end of a block, add a space
             }
             System.out.println(); //Create a new line
-            if(row == 2 || row == 5) System.out.println(); //If it is the end of a block, add another new line
+            if (row == 2 || row == 5) System.out.println(); //If it is the end of a block, add another new line
         }
-
     }
 
+    /**
+     * Outputs the solution to a file
+     *
+     * @param puzzle The solution to output
+     */
+    private static void output(int[][] puzzle) {
+
+        String fileNameSolved = fileName.replace(".sdk", ".solved"); //Remove .sdk and replace it with .solved
+        BufferedWriter out; //Initializer for the .solved file
+
+        try {
+            out = new BufferedWriter(new FileWriter(fileNameSolved)); //Create the writer
+
+            for(int row = 0; row < 9; row++) { //For each row
+                for(int col = 0; col < 9; col++) { //For each column
+                    out.write(Integer.toString(puzzle[row][col])); //Write the value to the file
+                    if(col < 8) out.write(" "); //Add a spacer if it is not the last column
+                }
+                if(row < 8) out.write("\n"); //Add a return if it is not the last row
+            }
+
+            out.close(); //Close the writer
+        } catch (IOException e) { //Catch any IOExceptions  and quit the program
+            System.err.println(e);
+            System.exit(1);
+        }
+    }
 }
