@@ -36,6 +36,9 @@ public class Sudoku {
         }
 
         readSdk(sdk); //Read through the .sdk file
+
+        System.out.println("Solving file " + fileName + "...\n");
+
         solve(); //Solve the puzzle
         print(temporary); //Print the solution to the console
         output(temporary); //Output the solution
@@ -91,7 +94,8 @@ public class Sudoku {
     private static int[][] solve(int row, int col) {
 
         if(ORIGINAL[row][col] == 0) {
-            temporary[row][col] = slotCheck(row, col);
+            int value = slotCheck(row, col);
+            temporary[row][col] = value;
         }
 
         /* Row and Column Counting*/
@@ -263,5 +267,7 @@ public class Sudoku {
             System.err.println(e);
             System.exit(1);
         }
+
+        System.out.println("\nThe solved file was saved and named \"" + fileNameSolved + "\"");
     }
 }
